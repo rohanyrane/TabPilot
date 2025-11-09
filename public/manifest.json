@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "TabSense",
+  "version": "1.0",
+  "description": "A simple Chrome extension template built with React and Vite",
+  "action": {
+    "default_title": "Open Side Panel"
+  },
+  "icons": {
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  },
+  "background": {
+    "service_worker": "src/background/index.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "tabs",
+    "tabGroups",
+    "activeTab",
+    "scripting",
+    "bookmarks",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
