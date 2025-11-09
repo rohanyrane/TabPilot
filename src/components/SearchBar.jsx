@@ -10,7 +10,7 @@ export default function SearchBar({ query, setQuery, results = [], onOpenTab }) 
       </h3>
       <div className="relative">
         <input
-          className="w-full border-2 border-slate-200 outline-none text-base px-4 py-3.5 rounded-xl bg-white transition-all focus:border-primary-500 focus:shadow-lg focus:shadow-primary-100 font-medium placeholder:text-slate-400"
+          className="w-full border-2 border-slate-200 outline-none text-base px-4 py-3.5 rounded-xl bg-white transition-all focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-100 font-medium placeholder:text-slate-400"
           type="text"
           placeholder="🔎 Search across all open tabs..."
           value={query}
@@ -22,14 +22,14 @@ export default function SearchBar({ query, setQuery, results = [], onOpenTab }) 
               Found {results.length} result{results.length !== 1 ? 's' : ''}
             </div>
             {results.map((r) => (
-              <div key={r.tabId} className="p-3 flex justify-between items-center rounded-lg mb-2 bg-primary-50/30 transition-all hover:bg-primary-50/60 hover:translate-x-1">
+              <div key={r.tabId} className="p-3 flex justify-between items-center rounded-lg mb-2 bg-emerald-50/40 transition-all hover:bg-emerald-50 hover:translate-x-1">
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold text-slate-900 truncate">{r.tabInfo?.title || `Tab ${r.tabId}`}</div>
                   <div className="text-xs text-slate-500 truncate">{r.tabInfo?.url}</div>
                 </div>
                 <button 
                   onClick={() => onOpenTab(r.tabId)}
-                  className="ml-3 px-3 py-1.5 text-xs bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all hover:-translate-y-0.5 shadow-sm"
+                  className="ml-3 px-3 py-1.5 text-xs bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all hover:-translate-y-0.5 shadow-sm"
                 >
                   Open
                 </button>

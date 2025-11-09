@@ -134,7 +134,7 @@ export default function BookmarksPanel() {
             return (
               <div
                 key={folder.id}
-                className="bg-white/80 border border-slate-200 rounded-xl hover:border-primary-300 transition-colors"
+                className="bg-white/80 border border-slate-200 rounded-xl hover:border-emerald-300 transition-colors"
               >
                 <div className="p-3 flex items-start justify-between gap-3">
                   {/* Title block */}
@@ -144,7 +144,7 @@ export default function BookmarksPanel() {
                         <input
                           value={editing.value}
                           onChange={(e) => setEditing({ ...editing, value: e.target.value })}
-                          className="w-full px-2 py-1 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-300 bg-white"
+                          className="w-full px-2 py-1 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white"
                         />
                         <div className="mt-1 flex items-center gap-2">
                           <button
@@ -204,7 +204,7 @@ export default function BookmarksPanel() {
                             href={b.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="block text-sm text-slate-800 no-underline hover:text-primary-600 truncate"
+                            className="block text-sm text-slate-800 no-underline hover:text-emerald-600 truncate"
                             title={b.title}
                           >
                             {b.title}

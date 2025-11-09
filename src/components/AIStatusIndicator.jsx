@@ -50,7 +50,7 @@ export default function AIStatusIndicator({ isProcessing }) {
         {/* Main Status */}
         <div className="flex items-center gap-3 mb-3">
           <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-600 rounded-lg flex items-center justify-center animate-pulse">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center animate-pulse">
               <span className="text-xl">{getModeIcon(settings.inferenceMode)}</span>
             </div>
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full animate-ping" />
@@ -71,8 +71,8 @@ export default function AIStatusIndicator({ isProcessing }) {
         </div>
 
         {/* Progress Bar */}
-        <div className="h-1 bg-slate-200 rounded-full overflow-hidden mb-3">
-          <div className="h-full bg-gradient-to-r from-primary-500 to-purple-600 animate-progress" />
+        <div className="h-1 bg-emerald-100 rounded-full overflow-hidden mb-3">
+          <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 animate-progress" />
         </div>
 
         {/* Details Panel */}
@@ -90,7 +90,7 @@ export default function AIStatusIndicator({ isProcessing }) {
               <span className="text-slate-500">Top K:</span>
               <span className="font-semibold text-slate-700">{settings.topK}</span>
             </div>
-            <div className="mt-3 p-2 bg-primary-50 rounded text-[10px] text-primary-700">
+            <div className="mt-3 p-2 bg-emerald-50 rounded text-[10px] text-emerald-700">
               💡 <strong>Tip:</strong> Check browser console for detailed logs
             </div>
           </div>
@@ -99,4 +99,3 @@ export default function AIStatusIndicator({ isProcessing }) {
     </div>
   );
 }
-

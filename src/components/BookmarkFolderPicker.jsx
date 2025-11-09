@@ -53,8 +53,8 @@ export default function BookmarkFolderPicker({
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
-      <div className="relative w-[min(720px,95vw)] max-h-[85vh] overflow-hidden rounded-2xl shadow-2xl bg-white border border-slate-200">
-        <div className="px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-primary-50/70 to-purple-50/70">
+      <div className="relative w-[min(720px,95vw)] max-h-[85vh] overflow-hidden rounded-2xl shadow-2xl bg-white border border-emerald-100">
+        <div className="px-4 py-3 border-b border-emerald-50 bg-gradient-to-r from-emerald-50/80 to-cyan-50/80">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="m-0 text-base font-bold text-slate-900">
@@ -91,12 +91,12 @@ export default function BookmarkFolderPicker({
               sortedFolders.map((f) => (
                 <label
                   key={f.id}
-                  className="flex items-center gap-3 p-2 rounded-lg border border-slate-200 bg-white/80 hover:border-primary-300 transition-colors"
+                  className="flex items-center gap-3 p-2 rounded-lg border border-slate-200 bg-white/80 hover:border-emerald-300 transition-colors"
                   title={f.title || "(Untitled Folder)"}
                 >
                   <input
                     type="checkbox"
-                    className="w-4 h-4"
+                    className="w-4 h-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-400"
                     checked={selected.has(f.id)}
                     onChange={() => toggle(f.id)}
                   />

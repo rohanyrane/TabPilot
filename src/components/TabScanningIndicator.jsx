@@ -37,11 +37,11 @@ export default function TabScanningIndicator({ isScanning, progress, totalTabs, 
         {/* Main Status */}
         <div className="flex items-center gap-3 mb-3">
           <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center animate-pulse">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center animate-pulse">
               <span className="text-xl">🔄</span>
             </div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-ping" />
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full animate-ping" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full" />
           </div>
           <div className="flex-1">
             <div className="font-bold text-sm text-slate-900">Scanning Tabs...</div>
@@ -63,9 +63,9 @@ export default function TabScanningIndicator({ isScanning, progress, totalTabs, 
             <span className="text-slate-500">Progress</span>
             <span className="font-semibold text-slate-700">{progressPercent.toFixed(0)}%</span>
           </div>
-          <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-emerald-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-blue-500 to-cyan-600 transition-all duration-300"
+              className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -76,7 +76,7 @@ export default function TabScanningIndicator({ isScanning, progress, totalTabs, 
           <div className="space-y-2 pt-3 border-t border-slate-200 text-xs">
             <div className="flex justify-between">
               <span className="text-slate-500">Status:</span>
-              <span className="font-semibold text-blue-600">
+              <span className="font-semibold text-emerald-600">
                 {progressPercent < 100 ? 'In Progress' : 'Completing...'}
               </span>
             </div>
@@ -88,7 +88,7 @@ export default function TabScanningIndicator({ isScanning, progress, totalTabs, 
               <span className="text-slate-500">Remaining:</span>
               <span className="font-semibold text-slate-700">{actualTotalTabs - scannedTabs}</span>
             </div>
-            <div className="mt-3 p-2 bg-blue-50 rounded text-[10px] text-blue-700">
+            <div className="mt-3 p-2 bg-emerald-50 rounded text-[10px] text-emerald-700">
               💡 <strong>Tip:</strong> Large numbers of tabs may take a moment
             </div>
           </div>

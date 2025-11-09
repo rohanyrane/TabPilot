@@ -89,16 +89,16 @@ export default function ClusterView({ categorizedTabs, tabsData, onRefresh, onMo
         if (clusterTabs.length === 0) return null;
 
         return (
-          <div key={category} className="bg-gradient-to-br from-primary-50/50 to-purple-50/50 border border-slate-200 rounded-xl p-4 transition-all hover:-translate-y-1 hover:shadow-md hover:border-primary-200">
+          <div key={category} className="bg-gradient-to-br from-emerald-50/60 to-cyan-50/60 border border-slate-200 rounded-xl p-4 transition-all hover:-translate-y-1 hover:shadow-md hover:border-emerald-200">
             <div className="flex justify-between items-start mb-2 gap-3">
-              <h4 className="m-0 text-base font-bold text-primary-600 flex-1 flex items-start gap-2 min-w-0 pr-4 sm:pr-6">
+              <h4 className="m-0 text-base font-bold text-emerald-600 flex-1 flex items-start gap-2 min-w-0 pr-4 sm:pr-6">
                 <span>📁</span>
                 {editingCategory === category ? (
                   <div className="w-full">
                     <input
                       value={titleInput}
                       onChange={(e) => setTitleInput(e.target.value)}
-                      className="w-full px-2 py-1 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-300 bg-white"
+                      className="w-full px-2 py-1 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white"
                     />
                     <div className="mt-1 flex items-center gap-2">
                       <button
@@ -166,11 +166,11 @@ export default function ClusterView({ categorizedTabs, tabsData, onRefresh, onMo
               </div>
               <ul className="list-none m-0 p-0">
                 {clusterTabs.map((tab) => (
-                  <li key={tab.tabId} className="py-2.5 border-b border-slate-200 last:border-b-0 transition-all hover:bg-primary-50/50 hover:rounded-md hover:pl-2 relative overflow-visible">
+                  <li key={tab.tabId} className="py-2.5 border-b border-slate-200 last:border-b-0 transition-all hover:bg-emerald-50/50 hover:rounded-md hover:pl-2 relative overflow-visible">
                     <div className="flex items-center justify-between gap-2 min-w-0">
                       <button
                         onClick={() => chrome.tabs.update(Number(tab.tabId), { active: true })}
-                        className="flex-1 min-w-0 text-left bg-transparent border-none cursor-pointer text-slate-800 text-sm font-medium transition-colors hover:text-primary-600 flex items-center gap-2 p-0"
+                        className="flex-1 min-w-0 text-left bg-transparent border-none cursor-pointer text-slate-800 text-sm font-medium transition-colors hover:text-emerald-600 flex items-center gap-2 p-0"
                       >
                         {tab.tabInfo?.favIconUrl ? (
                           <img
@@ -228,7 +228,7 @@ export default function ClusterView({ categorizedTabs, tabsData, onRefresh, onMo
                                     }
                                     setOpenDropdown(null);
                                   }}
-                                  className="w-full text-left px-2 py-1.5 text-xs text-slate-700 hover:bg-primary-50 rounded transition-colors"
+                                  className="w-full text-left px-2 py-1.5 text-xs text-slate-700 hover:bg-emerald-50 rounded transition-colors"
                                 >
                                   📁 {targetCategory}
                                 </button>

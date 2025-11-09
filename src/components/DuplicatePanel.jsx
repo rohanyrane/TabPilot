@@ -55,7 +55,7 @@ export default function DuplicatePanel({ duplicateGroups = [], onCloseDuplicates
                     href={tab.tabInfo?.url} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="block text-sm text-slate-800 no-underline py-1.5 border-b border-dashed border-slate-200 last:border-b-0 transition-colors hover:text-primary-600 flex items-center gap-2"
+                    className="block text-sm text-slate-800 no-underline py-1.5 border-b border-dashed border-slate-200 last:border-b-0 transition-colors hover:text-emerald-600 flex items-center gap-2"
                   >
                     <span>📄</span>
                     {tab.tabInfo?.title || tab.tabInfo?.url}
@@ -69,7 +69,7 @@ export default function DuplicatePanel({ duplicateGroups = [], onCloseDuplicates
                   <select
                     value={keep}
                     onChange={(e) => setSelectedKeep({ ...selectedKeep, [idx]: e.target.value })}
-                    className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm bg-white cursor-pointer transition-colors focus:outline-none focus:border-primary-500"
+                    className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm bg-white cursor-pointer transition-colors focus:outline-none focus:border-emerald-500"
                   >
                     {g.ids.map((id) => (
                       <option key={id} value={id}>

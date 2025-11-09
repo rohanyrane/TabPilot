@@ -215,3 +215,25 @@ export async function collectAllTabsData() {
     throw error;
   }
 }
+
+// Messaging helper for popup actions (simplify, applyTheme, toggleFont, etc.)
+export async function sendMessageToActiveTab(message) {
+  return new Promise((resolve) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tab = tabs[0];
+      if (!tab || !/^https?:/.test(tab.url)) {
+        console.warn('Active tab is not a valid web page.');
+        return resolve(null);
+      }
+
+      chrome.tabs.sendMessage(tab.id, message, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('Message failed:', chrome.runtime.lastError.message);
+          resolve(null);
+        } else {
+          resolve(response);
+        }
+      });
+    });
+  });
+}

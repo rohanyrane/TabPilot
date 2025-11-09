@@ -4,6 +4,8 @@ console.log('Chrome Extension background script loaded');
 
 // Import tab utilities
 import { collectAllTabsData, extractTabDetails } from '../utils/tabUtils.js';
+import { systemPrompts } from './systemPrompts.js';
+import { simplifyTextWithGemini } from '../utils/simplifierService.js';
 
 // Test if functions are imported
 console.log('collectAllTabsData function:', typeof collectAllTabsData);
@@ -11,9 +13,11 @@ console.log('extractTabDetails function:', typeof extractTabDetails);
 
 // Message interfaces removed - using plain JavaScript
 
-// Handle extension installation
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('Extension installed:', details.reason);
+  if (details.reason === 'install') {
+    chrome.storage.sync.remove('readingLevel');
+  }
 });
 
 // Handle extension button click - open side panel
@@ -37,14 +41,11 @@ chrome.action.onClicked.addListener(async (tab) => {
 });
 
 // Handle messages from side panel or content scripts
-chrome.runtime.onMessage.addListener((
-  request,
-  sender,
-  sendResponse
-) => {
-  console.log('Message received:', request);
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  const messageType = request?.type || request?.action;
+  console.log('Message received:', { messageType, request });
 
-  switch (request.type) {
+  switch (messageType) {
     case 'GET_CURRENT_TAB':
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         sendResponse({ tab: tabs[0] });
@@ -80,8 +81,28 @@ chrome.runtime.onMessage.addListener((
       }
       return true; // Keep message channel open for async response
 
+    case 'getSystemPrompts':
+      sendResponse({ success: true, prompts: systemPrompts });
+      return true;
+
+    case 'SIMPLIFY_CHUNK':
+    case 'simplifyWithBackground': {
+      const { text, optimizeMode, readingLevel } = request || {};
+      simplifyTextWithGemini({
+        text,
+        optimizeMode,
+        readingLevel
+      }).then((result) => {
+        sendResponse({ success: true, text: result });
+      }).catch((error) => {
+        console.error('Failed to simplify via background:', error);
+        sendResponse({ success: false, error: error?.message || 'Simplification failed' });
+      });
+      return true;
+    }
+
     default:
-      console.log('Unknown message type:', request.type);
+      console.log('Unknown message type:', messageType);
       sendResponse({ error: 'Unknown message type' });
   }
 });

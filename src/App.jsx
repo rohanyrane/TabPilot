@@ -10,7 +10,8 @@ import {
   moveTabBetweenCategories,
   removeCategory,
   removeTabFromCategory,
-  removeTab
+  removeTab,
+  summarizeTabContent
 } from "./store/slices/appSlice";
 
 import ControlBar from "./components/ControlBar";
@@ -22,6 +23,8 @@ import TabScanningIndicator from "./components/TabScanningIndicator";
 import TabPanel from "./components/TabPanel";
 import QueryTab from "./components/QueryTab";
 import BookmarkFolderPicker from "./components/BookmarkFolderPicker";
+import SimplifierPanel from "./components/SimplifierPanel";
+import MediaLab from "./components/MediaLab";
 
 import { detectDuplicates } from "./utils/duplicateUtils";
 
@@ -34,14 +37,16 @@ export default function App() {
     loading,
     error,
     processing,
-    aiProcessing
+    aiProcessing,
+    tabSummaries,
+    tabSummaryStatus
   } = useAppSelector((state) => state.app);
 
   // Local UI state
   const [dupThreshold, setDupThreshold] = useState(0.82);
   const [duplicateGroups, setDuplicateGroups] = useState([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [activeView, setActiveView] = useState("main"); // "main" or "query"
+  const [activeView, setActiveView] = useState("main"); // "main", "query", or "media"
   const [folderPickerOpen, setFolderPickerOpen] = useState(false);
   const [folderPickerFolders, setFolderPickerFolders] = useState([]);
   const [selectedFolderIds, setSelectedFolderIds] = useState(null);
@@ -506,101 +511,15 @@ export default function App() {
   // Memoize counts for header
   const tabCount = tabsData?.length || 0;
 
-  return (
-    <div className="flex flex-col h-full p-5 gradient-bg overflow-hidden max-w-6xl mx-auto gap-5">
-      <header className="glass-panel relative p-4 rounded-2xl">
-        {processing?.isProcessing && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-100/20 rounded-b-2xl overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-primary-500 to-purple-600 transition-all duration-300 shadow-lg shadow-primary-500/50"
-              style={{ width: `${Math.round(processing.progress || 0)}%` }}
-            />
-          </div>
-        )}
-        <div className="flex items-center justify-between gap-3 flex-nowrap">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-purple-600 rounded-xl text-white font-bold text-lg flex items-center justify-center shadow-lg shadow-primary-400/40 ring-1 ring-white/50">
-              <img src="/src/assets/logo.png" alt="TabSense Logo" className="w-18 h-18 object-contain" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="m-0 text-2xl font-bold gradient-text leading-tight">TabSense</h1>
-              <p className="m-0 text-slate-600 text-xs sm:text-sm font-medium leading-snug">Summarize • Cluster • Clean</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
-            <button
-              onClick={() => setSettingsOpen(true)}
-              className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-200 bg-white/70 hover:bg-white hover:border-slate-300 transition-colors shadow-sm text-slate-700"
-              title="Settings"
-              aria-label="Open settings"
-            >
-              <span className="text-lg leading-none">⚙️</span>
-            </button>
-            <div
-              role="status"
-              title={chromeApiAvailable ? "Chrome API available" : "Chrome API unavailable"}
-              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border whitespace-nowrap ${
-                chromeApiAvailable
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  : "bg-red-50 text-red-700 border-red-200"
-              }`}
-            >
-              <span>API</span>
-              <span className="text-sm">{chromeApiAvailable ? "✓" : "✗"}</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Quick Actions Bar */}
-      <div className="glass-panel rounded-xl p-2">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full">
-          <button
-            onClick={() => {
-              dispatch(processTabsWithProgress());
-            }}
-            className="w-full px-3 py-1.5 text-xs bg-primary-500 text-white rounded-lg shadow-sm font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center gap-1.5"
-          >
-            <span>🔄</span>
-            <span>Scan tabs</span>
-          </button>
-          <button
-            onClick={handleScanTabs}
-            disabled={aiProcessing.isProcessing || !tabsData || tabsData.length === 0}
-            className="w-full px-3 py-1.5 text-xs bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg shadow-sm font-semibold hover:from-primary-600 hover:to-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-            title={!tabsData || tabsData.length === 0 ? "Please scan tabs first" : "Categorize tabs with AI"}
-          >
-            <span>🔍</span>
-            <span>Categorize tabs</span>
-          </button>
-          <button
-            onClick={handleGroupTabs}
-            disabled={false}
-            className="w-full px-3 py-1.5 text-xs bg-emerald-500 text-white rounded-lg shadow-sm font-semibold hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-            title="Open missing bookmark links and group by bookmark folder title"
-          >
-            <span>📂</span>
-            <span>Group tabs</span>
-          </button>
-          <button
-            onClick={() => {
-              chrome.tabs.create({ url: "https://developer.chrome.com/docs/ai" });
-            }}
-            className="w-full px-3 py-1.5 text-xs bg-primary-100 text-primary-600 rounded-lg shadow-sm font-semibold hover:bg-primary-200 transition-colors flex items-center justify-center gap-1.5"
-          >
-            <span>📚</span>
-            <span>View Docs</span>
-          </button>
-        </div>
-      </div>
-
-      {activeView === "query" ? (
-        // Query View - Full screen query interface
+  const renderWorkspace = () => {
+    if (activeView === "query") {
+      return (
         <main className="flex-1 overflow-hidden">
-          <div className="glass-panel h-full flex flex-col gap-3 rounded-2xl p-4">
+          <div className="glass-panel h-full flex flex-col gap-3 rounded-2xl p-4 ">
             <ControlBar
               onHome={() => setActiveView("main")}
               onAsk={() => setActiveView("query")}
+              onMedia={() => setActiveView("media")}
               activeView={activeView}
             />
             <QueryTab
@@ -610,274 +529,346 @@ export default function App() {
             />
           </div>
         </main>
-      ) : (
-        // Main View - Full width layout
+      );
+    }
+
+    if (activeView === "media") {
+      return (
         <main className="flex-1 overflow-hidden">
           <div className="glass-panel flex flex-col gap-3 overflow-y-auto p-4 rounded-2xl h-full">
             <ControlBar
               onHome={() => setActiveView("main")}
               onAsk={() => setActiveView("query")}
+              onMedia={() => setActiveView("media")}
               activeView={activeView}
             />
-            <TabPanel
-              tabs={[
-                {
-                  icon: "📑",
-                  label: "All Tabs",
-                  badge: tabCount || null,
-                  content: (
-                    <div className="h-full overflow-y-auto">
-                      {tabsData.length === 0 ? (
-                        <div className="text-center py-12 text-slate-400">
-                          <div className="text-6xl mb-4 opacity-50">🗂️</div>
-                          <div className="font-semibold text-lg">No tabs found</div>
-                        </div>
-                      ) : (
-                        <>
-                          {visibleDupGroups.length > 0 && (
-                            <div className="mb-4 p-3 bg-gradient-to-br from-red-50/70 to-red-100/40 border border-red-200 rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <strong className="text-red-600 text-sm flex items-center gap-2">
-                                  <span>🔄</span>
-                                  Similar Tabs
-                                </strong>
-                                <span className="text-xs text-slate-500">
-                                  {visibleDupGroups.length} group{visibleDupGroups.length !== 1 ? 's' : ''}
-                                </span>
-                              </div>
-
-                              <div className="space-y-2">
-                                {visibleDupGroups.slice(0, 3).map((g, idx) => {
-                                  const keep = g.ids[0];
-                                  const groupTabs = g.ids.map((id) =>
-                                    tabsData.find((t) => String(t.tabId) === String(id))
-                                  ).filter(Boolean);
-
-                                  return (
-                                    <div key={idx} className="bg-white/70 border border-red-200 rounded-md p-2">
-                                      <div className="flex items-center justify-between">
-                                        <div className="text-xs text-slate-600">
-                                          {(g.avgScore * 100).toFixed(0)}% similar • {g.ids.length} tabs
-                                        </div>
-                                        <button
-                                          onClick={() => {
-                                            const toClose = g.ids.filter((id) => String(id) !== String(keep));
-                                            if (toClose.length === 0) {
-                                              alert('No other tabs to close in this group.');
-                                              return;
-                                            }
-                                            handleCloseDuplicates(keep, toClose);
-                                          }}
-                                          className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
-                                        >
-                                          Close {g.ids.length - 1}
-                                        </button>
-                                      </div>
-                                      <div className="mt-1 text-[11px] text-slate-700 space-y-1">
-                                        {groupTabs.slice(0, 3).map((tab) => (
-                                          <div key={tab.tabId} className="flex items-center gap-2 truncate">
-                                            <span>📄</span>
-                                            <span className="truncate">{tab.tabInfo?.title || tab.tabInfo?.url}</span>
-                                          </div>
-                                        ))}
-                                        {groupTabs.length > 3 && (
-                                          <div className="text-[10px] text-slate-500">+{groupTabs.length - 3} more…</div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                          <div className="space-y-2 pr-2">
-                            {tabsData.map((t) => (
-                              <div key={t.tabId} className="flex items-center justify-between p-3 bg-gradient-to-r from-primary-50/30 to-purple-50/30 border border-slate-200 rounded-xl hover:border-primary-300 transition-colors">
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  {t.tabInfo?.favIconUrl ? (
-                                    <img
-                                      src={t.tabInfo.favIconUrl}
-                                      alt=""
-                                      className="w-4 h-4 flex-shrink-0"
-                                      onError={(e) => e.target.style.display = 'none'}
-                                    />
-                                  ) : (
-                                    <span className="text-sm">🔗</span>
-                                  )}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-sm text-slate-900 truncate">{t.tabInfo?.title || "Untitled"}</div>
-                                    <div className="text-xs text-slate-500 truncate">{t.tabInfo?.url || "No url"}</div>
-                                  </div>
-                                </div>
-                                <div className="flex gap-2 ml-3">
-                                  <button
-                                    onClick={() => chrome.tabs.update(Number(t.tabId), { active: true })}
-                                    className="px-3 py-1.5 text-xs bg-primary-500 text-white rounded-lg shadow-sm hover:bg-primary-600 transition-colors"
-                                  >
-                                    Open
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      chrome.tabs.remove(Number(t.tabId));
-                                      setTimeout(() => dispatch(fetchTabsData()), 300);
-                                    }}
-                                    title="Close tab"
-                                    className="px-3 py-1.5 text-xs bg-red-500 text-white rounded-lg shadow-sm hover:bg-red-600 transition-colors"
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          {false && (
-                            <div className="mt-4 p-3 bg-gradient-to-br from-red-50/70 to-red-100/40 border border-red-200 rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <strong className="text-red-600 text-sm flex items-center gap-2">
-                                  <span>🔄</span>
-                                  Similar Tabs
-                                </strong>
-                                <span className="text-xs text-slate-500">
-                                  {visibleDupGroups.length} group{visibleDupGroups.length !== 1 ? 's' : ''}
-                                </span>
-                              </div>
-
-                              <div className="space-y-2">
-                                {visibleDupGroups.slice(0, 3).map((g, idx) => {
-                                  const keep = g.ids[0];
-                                  const groupTabs = g.ids.map((id) =>
-                                    tabsData.find((t) => String(t.tabId) === String(id))
-                                  ).filter(Boolean);
-
-                                  return (
-                                    <div key={idx} className="bg-white/70 border border-red-200 rounded-md p-2">
-                                      <div className="flex items-center justify-between">
-                                        <div className="text-xs text-slate-600">
-                                          {(g.avgScore * 100).toFixed(0)}% similar • {g.ids.length} tabs
-                                        </div>
-                                        <button
-                                          onClick={() => {
-                                            const toClose = g.ids.filter((id) => String(id) !== String(keep));
-                                            if (toClose.length === 0) {
-                                              alert('No other tabs to close in this group.');
-                                              return;
-                                            }
-                                            handleCloseDuplicates(keep, toClose);
-                                          }}
-                                          className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
-                                        >
-                                          Close {g.ids.length - 1}
-                                        </button>
-                                      </div>
-                                      <div className="mt-1 text-[11px] text-slate-700 space-y-1">
-                                        {groupTabs.slice(0, 3).map((tab) => (
-                                          <div key={tab.tabId} className="flex items-center gap-2 truncate">
-                                            <span>📄</span>
-                                            <span className="truncate">{tab.tabInfo?.title || tab.tabInfo?.url}</span>
-                                          </div>
-                                        ))}
-                                        {groupTabs.length > 3 && (
-                                          <div className="text-[10px] text-slate-500">+{groupTabs.length - 3} more…</div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  )
-                },
-                {
-                  icon: "✨",
-                  label: "AI Categorized",
-                  badge: categorizedTabs ? Object.keys(categorizedTabs).length : null,
-                  content: (
-                    <div className="h-full overflow-y-auto">
-                      {aiProcessing.isProcessing && (
-                        <div className="mb-3 p-3 bg-gradient-to-r from-primary-100/80 to-purple-100/80 rounded-lg text-primary-600 font-semibold text-sm">
-                          ⏳ AI is processing — results will update shortly...
-                        </div>
-                      )}
-                      {categorizedTabs ? (
-                        <ClusterView
-                          categorizedTabs={categorizedTabs}
-                          tabsData={tabsData}
-                          onRefresh={() => dispatch(fetchTabsData())}
-                          onMoveTab={(tabId, fromCategory, toCategory) => {
-                            dispatch(moveTabBetweenCategories({ tabId, fromCategory, toCategory }));
-                          }}
-                          onRemoveFromCategory={(tabId, category) => {
-                            dispatch(removeTabFromCategory({ tabId, category }));
-                          }}
-                          onRemoveCategory={(category) => {
-                            dispatch(removeCategory(category));
-                          }}
-                        />
-                      ) : (
-                        <div className="text-center py-12 text-slate-400">
-                          <div className="text-6xl mb-4 opacity-50">📊</div>
-                          <div className="font-semibold mb-2 text-lg">No categories yet</div>
-                          <div className="text-sm">Click "💬 ASK" to query your tabs or scan them first</div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                },
-                {
-                  icon: "🔖",
-                  label: "Bookmarks",
-                  content: (
-                    <BookmarksPanel />
-                  )
-                }
-              ]}
-            />
+            <MediaLab />
           </div>
         </main>
-      )}
+      );
+    }
 
-      <footer className="mt-auto pt-4 text-center text-white/80 text-xs font-medium">
-        <small>TabSense — Built with Chrome AI • Hybrid mode available</small>
-      </footer>
+    return (
+      <main className="flex-1 overflow-hidden">
+        <div className="glass-panel flex flex-col gap-3 overflow-y-auto p-4 rounded-2xl h-full">
+          <ControlBar
+            onHome={() => setActiveView("main")}
+            onAsk={() => setActiveView("query")}
+            onMedia={() => setActiveView("media")}
+            activeView={activeView}
+          />
+          <TabPanel
+            tabs={[
+              {
+                icon: "📑",
+                label: "All Tabs",
+                badge: tabCount || null,
+                content: (
+                  <div className="h-full overflow-y-auto">
+                    {tabsData.length === 0 ? (
+                      <div className="text-center py-12 text-slate-400">
+                        <div className="text-6xl mb-4 opacity-50">🗂️</div>
+                        <div className="font-semibold text-lg">No tabs found</div>
+                      </div>
+                    ) : (
+                      <>
+                        {visibleDupGroups.length > 0 && (
+                          <div className="mb-4 p-3 bg-gradient-to-br from-red-50/70 to-red-100/40 border border-red-200 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <strong className="text-red-600 text-sm flex items-center gap-2">
+                                <span>🔄</span>
+                                Similar Tabs
+                              </strong>
+                              <span className="text-xs text-slate-500">
+                                {visibleDupGroups.length} group{visibleDupGroups.length !== 1 ? 's' : ''}
+                              </span>
+                            </div>
 
-      {/* Settings Modal */}
-      <Settings
-        isOpen={settingsOpen}
-        onClose={() => {
-          setSettingsOpen(false);
-          // Reload settings after closing
-          getSettings().then((settings) => {
-            setDupThreshold(settings.duplicateThreshold);
-          });
-        }}
-      />
+                            <div className="space-y-2">
+                              {visibleDupGroups.slice(0, 3).map((g, idx) => {
+                                const keep = g.ids[0];
+                                const groupTabs = g.ids.map((id) =>
+                                  tabsData.find((t) => String(t.tabId) === String(id))
+                                ).filter(Boolean);
 
-      {/* Bookmark folder selection */}
-      <BookmarkFolderPicker
-        isOpen={folderPickerOpen}
-        folders={folderPickerFolders}
-        onCancel={() => setFolderPickerOpen(false)}
-        onConfirm={async (ids) => {
-          setFolderPickerOpen(false);
-          await handleGroupTabs(ids);
-        }}
-      />
+                                return (
+                                  <div key={idx} className="bg-white/70 border border-red-200 rounded-md p-2">
+                                    <div className="flex items-center justify-between">
+                                      <div className="text-xs text-slate-600">
+                                        {(g.avgScore * 100).toFixed(0)}% similar • {g.ids.length} tabs
+                                      </div>
+                                      <button
+                                        onClick={() => {
+                                          const toClose = g.ids.filter((id) => String(id) !== String(keep));
+                                          if (toClose.length === 0) {
+                                            alert('No other tabs to close in this group.');
+                                            return;
+                                          }
+                                          handleCloseDuplicates(keep, toClose);
+                                        }}
+                                        className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
+                                      >
+                                        Close {g.ids.length - 1}
+                                      </button>
+                                    </div>
+                                    <div className="mt-1 text-[11px] text-slate-700 space-y-1">
+                                      {groupTabs.slice(0, 3).map((tab) => (
+                                        <div key={tab.tabId} className="flex items-center gap-2 truncate">
+                                          <span>📄</span>
+                                          <span className="truncate">{tab.tabInfo?.title || tab.tabInfo?.url}</span>
+                                        </div>
+                                      ))}
+                                      {groupTabs.length > 3 && (
+                                        <div className="text-[10px] text-slate-500">+{groupTabs.length - 3} more…</div>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                        <div className="space-y-2 pr-2">
+                          {tabsData.map((t) => {
+                            const tabId = String(t.tabId);
+                            const summaryState = tabSummaryStatus?.[tabId];
+                            const summary = tabSummaries?.[tabId];
+                            return (
+                              <div key={t.tabId} className="space-y-3 p-3 bg-gradient-to-r from-emerald-50/40 to-cyan-50/40 border border-slate-200 rounded-xl hover:border-emerald-300 transition-colors">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    {t.tabInfo?.favIconUrl ? (
+                                      <img
+                                        src={t.tabInfo.favIconUrl}
+                                        alt=""
+                                        className="w-4 h-4 flex-shrink-0"
+                                        onError={(e) => e.target.style.display = 'none'}
+                                      />
+                                    ) : (
+                                      <span className="text-sm">🔗</span>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="font-semibold text-sm text-slate-900 truncate">{t.tabInfo?.title || "Untitled"}</div>
+                                      <div className="text-xs text-slate-500 truncate">{t.tabInfo?.url || "No url"}</div>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2 ml-3">
+                                    <button
+                                      onClick={() => chrome.tabs.update(Number(t.tabId), { active: true })}
+                                      className="px-3 py-1.5 text-xs bg-emerald-500 text-white rounded-lg shadow-sm hover:bg-emerald-600 transition-colors"
+                                    >
+                                      Open
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        chrome.tabs.remove(Number(t.tabId));
+                                        setTimeout(() => dispatch(fetchTabsData()), 300);
+                                      }}
+                                      title="Close tab"
+                                      className="px-3 py-1.5 text-xs bg-red-500 text-white rounded-lg shadow-sm hover:bg-red-600 transition-colors"
+                                    >
+                                      ✕
+                                    </button>
+                                    <button
+                                      onClick={() => dispatch(summarizeTabContent(t.tabId))}
+                                      disabled={summaryState === "loading"}
+                                      className="px-3 py-1.5 text-xs bg-slate-800 text-white rounded-lg shadow-sm hover:bg-slate-900 transition-colors disabled:opacity-60"
+                                    >
+                                      {summaryState === "loading" ? "Summarizing…" : "Summarize"}
+                                    </button>
+                                  </div>
+                                </div>
+                                {summary && (
+                                  <div className="tab-summary-card">
+                                    <p className="tab-summary-card__label">Gemini Summary</p>
+                                    <div className="tab-summary-card__body">
+                                      {summary.split("\n").map((line, idx) => (
+                                        <p key={`${tabId}-line-${idx}`} className="tab-summary-card__text">
+                                          {line}
+                                        </p>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )
+              },
+              {
+                icon: "✨",
+                label: "AI Categorized",
+                badge: categorizedTabs ? Object.keys(categorizedTabs).length : null,
+                content: (
+                  <div className="h-full overflow-y-auto">
+                    {aiProcessing.isProcessing && (
+                      <div className="mb-3 p-3 bg-gradient-to-r from-emerald-100/80 to-teal-100/80 rounded-lg text-emerald-700 font-semibold text-sm">
+                        ⏳ AI is processing — results will update shortly...
+                      </div>
+                    )}
+                    {categorizedTabs ? (
+                      <ClusterView
+                        categorizedTabs={categorizedTabs}
+                        tabsData={tabsData}
+                        onRefresh={() => dispatch(fetchTabsData())}
+                        onMoveTab={(tabId, fromCategory, toCategory) => {
+                          dispatch(moveTabBetweenCategories({ tabId, fromCategory, toCategory }));
+                        }}
+                        onRemoveFromCategory={(tabId, category) => {
+                          dispatch(removeTabFromCategory({ tabId, category }));
+                        }}
+                        onRemoveCategory={(category) => {
+                          dispatch(removeCategory(category));
+                        }}
+                      />
+                    ) : (
+                      <div className="text-center py-12 text-slate-400">
+                        <div className="text-6xl mb-4 opacity-50">📊</div>
+                        <div className="font-semibold mb-2 text-lg">No categories yet</div>
+                        <div className="text-sm">Click "💬 ASK" to query your tabs or scan them first</div>
+                      </div>
+                    )}
+                  </div>
+                )
+              },
+              {
+                icon: "🔖",
+                label: "Bookmarks",
+                content: (
+                  <BookmarksPanel />
+                )
+              }
+            ]}
+          />
+        </div>
+      </main>
+    );
+  };
 
-      {/* AI Status Indicator */}
-      <AIStatusIndicator isProcessing={aiProcessing.isProcessing || processing.isProcessing} />
+  return (
+    <div className="app-shell overflow-y-auto">
+      <div className="app-scroll-body">
+        {/* <div className="glass-panel flex flex-col  overflow-y-auto p-4 rounded-2xl h-full"> */}
+        <header className="app-header flex-shrink-0">
+          {processing?.isProcessing && (
+            <div className="app-progress-track">
+              <div
+                className="app-progress-fill"
+                style={{ width: `${Math.round(processing.progress || 0)}%` }}
+              />
+            </div>
+          )}
+          <div className="app-header-row">
+            <div className="app-logo-wrapper">
+              <div className="app-logo">
+                <img src="/src/assets/logo.png" alt="TabPilot Logo" className="app-logo-img" />
+              </div>
+              <div className="app-title-block">
+                <h1 className="app-title">TabPilot</h1>
+                <p className="app-subtitle">Curate • Cluster • Clean</p>
+              </div>
+            </div>
+            <div className="app-header-actions">
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="app-icon-button"
+                title="Settings"
+                aria-label="Open settings"
+              >
+                <span className="text-lg leading-none">⚙️</span>
+              </button>
+              <div
+                role="status"
+                title={chromeApiAvailable ? "Chrome API available" : "Chrome API unavailable"}
+                className={`app-status ${chromeApiAvailable ? "app-status--ok" : "app-status--error"}`}
+              >
+                <span>API</span>
+                <span className="text-sm">{chromeApiAvailable ? "✓" : "✗"}</span>
+              </div>
+            </div>
+          </div>
+        </header>
 
-      {/* Tab Scanning Indicator */}
-      <TabScanningIndicator
-        isScanning={processing.isProcessing}
-        progress={processing.progress || 0}
-        totalTabs={tabsData?.length || 0}
-        aiProcessing={aiProcessing.isProcessing}
-      />
+        {/* Quick Actions Bar */}
+        <div className="quick-actions-panel flex-shrink-0">
+          <div className="quick-actions-row">
+            <button
+              onClick={() => dispatch(processTabsWithProgress())}
+              className="quick-button quick-button--scan"
+            >
+              <span>🔄</span>
+              <span>Scan</span>
+            </button>
+            <button
+              onClick={handleScanTabs}
+              disabled={aiProcessing.isProcessing || !tabsData || tabsData.length === 0}
+              className="quick-button quick-button--categorize"
+              title={!tabsData || tabsData.length === 0 ? "Please scan tabs first" : "Categorize tabs with AI"}
+            >
+              <span>🔍</span>
+              <span>Categorize</span>
+            </button>
+            <button
+              onClick={handleGroupTabs}
+              className="quick-button quick-button--group"
+              title="Open missing bookmark links and group by bookmark folder title"
+            >
+              <span>📂</span>
+              <span>Group</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="min-h-[350px] max-h-[350px]">
+          <SimplifierPanel />
+        </div>
+
+        <div className="min-h-[350px] max-h-[350px]">
+          {renderWorkspace()}
+        </div>
+
+        {/* <footer className="mt-auto pt-4 text-center text-emerald-700 text-xs font-medium">
+          <small>TabPilot — Built with Chrome AI • Hybrid mode available</small>
+        </footer> */}
+
+        {/* Settings Modal */}
+        <Settings
+          isOpen={settingsOpen}
+          onClose={() => {
+            setSettingsOpen(false);
+            // Reload settings after closing
+            getSettings().then((settings) => {
+              setDupThreshold(settings.duplicateThreshold);
+            });
+          }}
+        />
+
+        {/* Bookmark folder selection */}
+        <BookmarkFolderPicker
+          isOpen={folderPickerOpen}
+          folders={folderPickerFolders}
+          onCancel={() => setFolderPickerOpen(false)}
+          onConfirm={async (ids) => {
+            setFolderPickerOpen(false);
+            await handleGroupTabs(ids);
+          }}
+        />
+
+        {/* AI Status Indicator */}
+        <AIStatusIndicator isProcessing={aiProcessing.isProcessing || processing.isProcessing} />
+
+        {/* Tab Scanning Indicator */}
+        <TabScanningIndicator
+          isScanning={processing.isProcessing}
+          progress={processing.progress || 0}
+          totalTabs={tabsData?.length || 0}
+          aiProcessing={aiProcessing.isProcessing}
+        />
+      </div>
     </div>
   );
 }

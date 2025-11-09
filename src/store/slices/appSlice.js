@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { processTabsWithAI } from '../../utils/aiModel'
+import { summarizeTabMultimodal } from '../../utils/multimodalSummary.js'
 
 // Async thunk for fetching all tabs data
 export const fetchTabsData = createAsyncThunk(
@@ -117,12 +118,31 @@ export const processTabsWithProgress = createAsyncThunk(
   }
 )
 
+export const summarizeTabContent = createAsyncThunk(
+  'app/summarizeTabContent',
+  async (tabId, { getState, rejectWithValue }) => {
+    try {
+      const state = getState()
+      const targetTab = state.app.tabsData.find((t) => String(t.tabId) === String(tabId))
+      if (!targetTab) {
+        return rejectWithValue('Tab content not found')
+      }
+      const summary = await summarizeTabMultimodal(targetTab)
+      return { tabId: String(tabId), summary }
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 const initialState = {
   chromeApiAvailable: false,
   tabsData: [],
   categorizedTabs: null,
   loading: false,
   error: null,
+  tabSummaries: {},
+  tabSummaryStatus: {},
   processing: {
     isProcessing: false,
     totalTabs: 0,
@@ -269,6 +289,20 @@ const appSlice = createSlice({
       .addCase(processTabsWithAIAction.rejected, (state, action) => {
         state.aiProcessing.isProcessing = false
         state.aiProcessing.error = action.payload
+      })
+      .addCase(summarizeTabContent.pending, (state, action) => {
+        const tabId = String(action.meta.arg)
+        state.tabSummaryStatus[tabId] = 'loading'
+      })
+      .addCase(summarizeTabContent.fulfilled, (state, action) => {
+        const { tabId, summary } = action.payload
+        state.tabSummaries[tabId] = summary
+        state.tabSummaryStatus[tabId] = 'success'
+      })
+      .addCase(summarizeTabContent.rejected, (state, action) => {
+        const tabId = String(action.meta.arg)
+        state.tabSummaryStatus[tabId] = 'error'
+        state.error = action.payload
       })
   },
 })

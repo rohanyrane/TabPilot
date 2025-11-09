@@ -81,7 +81,7 @@ export default function QueryTab({ tabsData, categorizedTabs, onOpenTab }) {
       // Tab references like [1]
       .replace(
         /\[(\d+)\]/g,
-        '<span class="inline-block px-2 py-1 bg-primary-100 text-primary-600 rounded text-xs font-semibold mr-1">[$1]</span>'
+        '<span class="inline-block px-2 py-1 bg-emerald-100 text-emerald-600 rounded text-xs font-semibold mr-1">[$1]</span>'
       );
     return formatted;
   };
@@ -339,19 +339,19 @@ export default function QueryTab({ tabsData, categorizedTabs, onOpenTab }) {
       const tabsBlock =
         cleanedTabs.length > 0
           ? cleanedTabs
-              .map(
-                (t) => `[${t.id}] ${t.title}
+            .map(
+              (t) => `[${t.id}] ${t.title}
 URL: ${t.url}
 Content: ${t.content}`
-              )
-              .join("\n\n")
+            )
+            .join("\n\n")
           : "(no tab context available)";
 
       const bookmarksBlock =
         relatedBookmarks.length > 0
           ? relatedBookmarks
-              .map((b, i) => `(${i + 1}) ${b.title} — ${b.url}`)
-              .join("\n")
+            .map((b, i) => `(${i + 1}) ${b.title} — ${b.url}`)
+            .join("\n")
           : "(no related bookmarks)";
 
       const intentHints = [];
@@ -385,28 +385,40 @@ Now provide the best possible answer based on the above context.`;
 
       console.log(`🤖 Sending to AI with ${cleanedTabs.length} tab(s) and ${relatedBookmarks.length} bookmark(s).`);
       const startTime = performance.now();
-      const result = await model.generateContent([prompt]);
+      console.log("MODEL  :", model)
+      console.log("prompt : ", prompt)
+      const contents = [prompt]
+      const result = await model.generateContent({
+        model: "gemini-2.5-flash",
+        contents,
+        config: {
+          temperature: 0.7,
+          topK: 40,
+          maxOutputTokens: 1024,
+        },
+      });
       const endTime = performance.now();
       console.log(`✅ AI response received in ${((endTime - startTime) / 1000).toFixed(2)}s`);
 
       // Extract and format response
       let responseText = "";
+
       try {
-        const resp = result?.response;
-        if (resp && typeof resp.text === "function") {
-          responseText = resp.text();
-        } else if (resp && resp?.candidates && resp.candidates[0]) {
-          responseText = resp.candidates[0]?.content?.parts?.[0]?.text ?? "";
+        if (result?.candidates?.length > 0) {
+          // Take the first candidate's text
+          responseText = result.candidates[0]?.content?.parts?.[0]?.text || "";
+        } else if (typeof result === "string") {
+          responseText = result;
         } else {
-          responseText = String(result);
+          // fallback: stringify the whole object nicely
+          responseText = JSON.stringify(result, null, 2);
         }
-      } catch (e2) {
-        console.warn("Could not read response.text() — falling back to raw result", e2);
-        responseText = JSON.stringify(result);
+      } catch (err) {
+        console.warn("Failed to extract AI response:", err);
+        responseText = JSON.stringify(result, null, 2);
       }
-
+      console.log(responseText)
       const formattedResponse = formatResponse(responseText);
-
       // Determine single reference link with highest score (from relevant tabs)
       let bestRef = null;
       if (relevantTabs && relevantTabs.length > 0) {
@@ -421,7 +433,7 @@ Now provide the best possible answer based on the above context.`;
           score: best.score || 0,
         };
       }
-
+      console.log(formattedResponse)
       // Append assistant message (AI Response; only one reference link at bottom)
       setMessages((prev) => [
         ...prev,
@@ -460,7 +472,7 @@ Now provide the best possible answer based on the above context.`;
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="e.g., 'Summarize my current tab', 'Summarize the YouTube video on my tab', 'Provide similar resources', 'Which tabs are about AI?'"
-              className="w-full p-3 border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              className="w-full p-3 border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
               rows={3}
               disabled={isProcessing}
             />
@@ -474,7 +486,7 @@ Now provide the best possible answer based on the above context.`;
               <button
                 type="submit"
                 disabled={!query.trim() || isProcessing}
-                className="px-4 py-2 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg font-semibold text-sm hover:from-primary-600 hover:to-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg font-semibold text-sm hover:from-emerald-600 hover:to-teal-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isProcessing ? (
                   <>
@@ -509,7 +521,7 @@ Now provide the best possible answer based on the above context.`;
             if (m.role === "user") {
               return (
                 <div key={idx} className="flex justify-end">
-                  <div className="max-w-[85%] bg-primary-50/60 border border-primary-200 rounded-xl p-3 shadow-sm">
+                  <div className="max-w-[85%] bg-emerald-50/60 border border-emerald-200 rounded-xl p-3 shadow-sm">
                     <div className="text-xs text-slate-500 mb-1">You</div>
                     <div className="text-slate-800 text-sm whitespace-pre-wrap">{m.text}</div>
                   </div>
@@ -521,7 +533,7 @@ Now provide the best possible answer based on the above context.`;
               <div key={idx} className="flex justify-start">
                 <div className="w-full max-w-[95%]">
                   {/* AI Response */}
-                  <div className="p-4 bg-gradient-to-r from-primary-50/30 to-purple-50/30 border border-slate-200 rounded-lg">
+                  <div className="p-4 bg-gradient-to-r from-emerald-50/40 to-cyan-50/40 border border-slate-200 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm">🤖</span>
                       <span className="font-semibold text-slate-700 text-sm">AI Response</span>
@@ -539,7 +551,7 @@ Now provide the best possible answer based on the above context.`;
                             href={m.reference.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-primary-700 hover:underline truncate"
+                            className="text-emerald-700 hover:underline truncate"
                             title={m.reference.title || m.reference.url}
                           >
                             {m.reference.title || m.reference.url}
@@ -547,7 +559,7 @@ Now provide the best possible answer based on the above context.`;
                           {m.reference.tabId && (
                             <button
                               onClick={() => handleTabClick(m.reference.tabId)}
-                              className="px-3 py-1 text-xs bg-primary-500 text-white rounded hover:bg-primary-600"
+                              className="px-3 py-1 text-xs bg-emerald-500 text-white rounded hover:bg-emerald-600"
                             >
                               Open
                             </button>

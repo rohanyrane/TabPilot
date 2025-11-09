@@ -26,9 +26,9 @@ export default function Settings({ isOpen, onClose }) {
   // Load settings from Chrome storage
   useEffect(() => {
     if (isOpen) {
-      chrome.storage.sync.get("tabSenseSettings", (result) => {
-        if (result.tabSenseSettings) {
-          setSettings({ ...DEFAULT_SETTINGS, ...result.tabSenseSettings });
+      chrome.storage.sync.get("TabPilotSettings", (result) => {
+        if (result.TabPilotSettings) {
+          setSettings({ ...DEFAULT_SETTINGS, ...result.TabPilotSettings });
         }
       });
     }
@@ -37,7 +37,7 @@ export default function Settings({ isOpen, onClose }) {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await chrome.storage.sync.set({ tabSenseSettings: settings });
+      await chrome.storage.sync.set({ TabPilotSettings: settings });
       // Reset AI model so new settings take effect
       resetAIModel();
       setSaveSuccess(true);
@@ -71,12 +71,12 @@ export default function Settings({ isOpen, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
               <span className="text-xl">⚙️</span>
             </div>
             <div>
               <h2 className="text-2xl font-bold gradient-text">Settings</h2>
-              <p className="text-sm text-slate-500">Configure your TabSense experience</p>
+              <p className="text-sm text-slate-500">Configure your TabPilot experience</p>
             </div>
           </div>
           <button
@@ -98,14 +98,14 @@ export default function Settings({ isOpen, onClose }) {
             
             <div className="space-y-4">
               {/* Inference Mode */}
-              <div className="bg-gradient-to-r from-primary-50/30 to-purple-50/30 rounded-xl p-4">
+              <div className="bg-gradient-to-r from-emerald-50/40 to-cyan-50/40 rounded-xl p-4">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Inference Mode
                 </label>
                 <select
                   value={settings.inferenceMode}
                   onChange={(e) => updateSetting("inferenceMode", e.target.value)}
-                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-lg bg-white text-sm font-medium focus:outline-none focus:border-primary-500 transition-colors"
+                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-lg bg-white text-sm font-medium focus:outline-none focus:border-emerald-500 transition-colors"
                 >
                   <option value="PREFER_ON_DEVICE">Prefer On-Device (Faster, Private)</option>
                   <option value="PREFER_CLOUD">Prefer Cloud (More Powerful)</option>
@@ -118,14 +118,14 @@ export default function Settings({ isOpen, onClose }) {
               </div>
 
               {/* Cloud Model */}
-              <div className="bg-gradient-to-r from-primary-50/30 to-purple-50/30 rounded-xl p-4">
+              <div className="bg-gradient-to-r from-emerald-50/40 to-cyan-50/40 rounded-xl p-4">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Cloud Model
                 </label>
                 <select
                   value={settings.cloudModel}
                   onChange={(e) => updateSetting("cloudModel", e.target.value)}
-                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-lg bg-white text-sm font-medium focus:outline-none focus:border-primary-500 transition-colors"
+                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-lg bg-white text-sm font-medium focus:outline-none focus:border-emerald-500 transition-colors"
                 >
                   <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                   <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
@@ -137,7 +137,7 @@ export default function Settings({ isOpen, onClose }) {
               </div>
 
               {/* Temperature */}
-              <div className="bg-gradient-to-r from-primary-50/30 to-purple-50/30 rounded-xl p-4">
+              <div className="bg-gradient-to-r from-emerald-50/40 to-cyan-50/40 rounded-xl p-4">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Temperature: {settings.temperature.toFixed(1)}
                 </label>
@@ -148,7 +148,7 @@ export default function Settings({ isOpen, onClose }) {
                   step="0.1"
                   value={settings.temperature}
                   onChange={(e) => updateSetting("temperature", parseFloat(e.target.value))}
-                  className="w-full h-2 bg-gradient-to-r from-primary-100 to-primary-500 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br [&::-webkit-slider-thumb]:from-primary-500 [&::-webkit-slider-thumb]:to-purple-600 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-primary-400/40 [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
+                  className="w-full h-2 bg-gradient-to-r from-emerald-100 to-emerald-500 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br [&::-webkit-slider-thumb]:from-emerald-500 [&::-webkit-slider-thumb]:to-teal-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-emerald-300/40 [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
                 />
                 <p className="text-xs text-slate-500 mt-2">
                   Controls randomness: 0 = focused, 1 = creative
@@ -156,7 +156,7 @@ export default function Settings({ isOpen, onClose }) {
               </div>
 
               {/* Top K */}
-              <div className="bg-gradient-to-r from-primary-50/30 to-purple-50/30 rounded-xl p-4">
+              <div className="bg-gradient-to-r from-emerald-50/40 to-cyan-50/40 rounded-xl p-4">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Top K: {settings.topK}
                 </label>
@@ -167,7 +167,7 @@ export default function Settings({ isOpen, onClose }) {
                   step="1"
                   value={settings.topK}
                   onChange={(e) => updateSetting("topK", parseInt(e.target.value))}
-                  className="w-full h-2 bg-gradient-to-r from-primary-100 to-primary-500 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br [&::-webkit-slider-thumb]:from-primary-500 [&::-webkit-slider-thumb]:to-purple-600 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-primary-400/40 [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
+                  className="w-full h-2 bg-gradient-to-r from-emerald-100 to-emerald-500 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br [&::-webkit-slider-thumb]:from-emerald-500 [&::-webkit-slider-thumb]:to-teal-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-emerald-300/40 [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
                 />
                 <p className="text-xs text-slate-500 mt-2">
                   Number of highest probability tokens to consider
@@ -175,7 +175,7 @@ export default function Settings({ isOpen, onClose }) {
               </div>
 
               {/* Max Output Tokens */}
-              <div className="bg-gradient-to-r from-primary-50/30 to-purple-50/30 rounded-xl p-4">
+              <div className="bg-gradient-to-r from-emerald-50/40 to-cyan-50/40 rounded-xl p-4">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Max Output Tokens: {settings.maxOutputTokens}
                 </label>
@@ -186,7 +186,7 @@ export default function Settings({ isOpen, onClose }) {
                   step="1024"
                   value={settings.maxOutputTokens}
                   onChange={(e) => updateSetting("maxOutputTokens", parseInt(e.target.value))}
-                  className="w-full h-2 bg-gradient-to-r from-primary-100 to-primary-500 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br [&::-webkit-slider-thumb]:from-primary-500 [&::-webkit-slider-thumb]:to-purple-600 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-primary-400/40 [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
+                  className="w-full h-2 bg-gradient-to-r from-emerald-100 to-emerald-500 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br [&::-webkit-slider-thumb]:from-emerald-500 [&::-webkit-slider-thumb]:to-teal-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-emerald-300/40 [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
                 />
                 <p className="text-xs text-slate-500 mt-2">
                   Maximum length of AI responses
@@ -204,7 +204,7 @@ export default function Settings({ isOpen, onClose }) {
             
             <div className="space-y-4">
               {/* Duplicate Threshold */}
-              <div className="bg-gradient-to-r from-primary-50/30 to-purple-50/30 rounded-xl p-4">
+              <div className="bg-gradient-to-r from-emerald-50/40 to-cyan-50/40 rounded-xl p-4">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Duplicate Detection Threshold: {settings.duplicateThreshold.toFixed(2)}
                 </label>
@@ -215,7 +215,7 @@ export default function Settings({ isOpen, onClose }) {
                   step="0.01"
                   value={settings.duplicateThreshold}
                   onChange={(e) => updateSetting("duplicateThreshold", parseFloat(e.target.value))}
-                  className="w-full h-2 bg-gradient-to-r from-primary-100 to-primary-500 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br [&::-webkit-slider-thumb]:from-primary-500 [&::-webkit-slider-thumb]:to-purple-600 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-primary-400/40 [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
+                  className="w-full h-2 bg-gradient-to-r from-emerald-100 to-emerald-500 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br [&::-webkit-slider-thumb]:from-emerald-500 [&::-webkit-slider-thumb]:to-teal-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-emerald-300/40 [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
                 />
                 <p className="text-xs text-slate-500 mt-2">
                   Higher = stricter duplicate detection (fewer duplicates found)
@@ -232,7 +232,7 @@ export default function Settings({ isOpen, onClose }) {
             </h3>
             
             <div className="space-y-3">
-              <label className="flex items-center justify-between bg-gradient-to-r from-primary-50/30 to-purple-50/30 rounded-xl p-4 cursor-pointer hover:shadow-sm transition-shadow">
+              <label className="flex items-center justify-between bg-gradient-to-r from-emerald-50/40 to-cyan-50/40 rounded-xl p-4 cursor-pointer hover:shadow-sm transition-shadow">
                 <div>
                   <div className="text-sm font-semibold text-slate-700">Show Emojis</div>
                   <div className="text-xs text-slate-500">Display emojis throughout the UI</div>
@@ -241,11 +241,11 @@ export default function Settings({ isOpen, onClose }) {
                   type="checkbox"
                   checked={settings.showEmojis}
                   onChange={(e) => updateSetting("showEmojis", e.target.checked)}
-                  className="w-5 h-5 rounded border-2 border-slate-300 text-primary-600 focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 cursor-pointer"
+                  className="w-5 h-5 rounded border-2 border-slate-300 text-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer"
                 />
               </label>
 
-              <label className="flex items-center justify-between bg-gradient-to-r from-primary-50/30 to-purple-50/30 rounded-xl p-4 cursor-pointer hover:shadow-sm transition-shadow">
+              <label className="flex items-center justify-between bg-gradient-to-r from-emerald-50/40 to-cyan-50/40 rounded-xl p-4 cursor-pointer hover:shadow-sm transition-shadow">
                 <div>
                   <div className="text-sm font-semibold text-slate-700">Auto Refresh</div>
                   <div className="text-xs text-slate-500">Automatically refresh tabs periodically</div>
@@ -254,7 +254,7 @@ export default function Settings({ isOpen, onClose }) {
                   type="checkbox"
                   checked={settings.autoRefresh}
                   onChange={(e) => updateSetting("autoRefresh", e.target.checked)}
-                  className="w-5 h-5 rounded border-2 border-slate-300 text-primary-600 focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 cursor-pointer"
+                  className="w-5 h-5 rounded border-2 border-slate-300 text-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer"
                 />
               </label>
             </div>
@@ -279,7 +279,7 @@ export default function Settings({ isOpen, onClose }) {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-600 rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center gap-2"
+              className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center gap-2"
             >
               {isSaving ? (
                 <>
@@ -306,8 +306,8 @@ export default function Settings({ isOpen, onClose }) {
 // Export function to get settings
 export async function getSettings() {
   return new Promise((resolve) => {
-    chrome.storage.sync.get("tabSenseSettings", (result) => {
-      resolve({ ...DEFAULT_SETTINGS, ...result.tabSenseSettings });
+    chrome.storage.sync.get("TabPilotSettings", (result) => {
+      resolve({ ...DEFAULT_SETTINGS, ...result.TabPilotSettings });
     });
   });
 }
